@@ -12,28 +12,36 @@ public class OMGen {
     public static final String APP_NAME = "OMGen";
     private static final CommandLineProcessor cmdProcessor = new CommandLineProcessor();
 
-    private boolean simulationMode;
-
     public static void main(String[] args) {
-        CommandLine cmd = null;
+        CommandLine cmd = cmdProcessor.parseCommandLine(args);
 
-        cmd = cmdProcessor.parseCommandLine(args);
-
-        if (!cmdProcessor.validArguments(cmd))
+        if (!cmdProcessor.isValidArguments(cmd))
             abend();
 
-        new OMGen().run(cmd);
+        new OMGen().run(new InvocationContext(cmd));
     }
 
-    private void run(CommandLine cmd) {
-        simulationMode = cmd.hasOption("s");
-        Generator generator = GeneratorFactory.createGenerator(GeneratorType.DEFAULT_VELOCITY_GENERATOR);
+    private void run(InvocationContext context) {
+        Generator generator = createGenerator(context);
         try {
-            String result = generator.generate(loadClass(cmd.getArgs()[0]));
-            System.out.println(result);
+            String result = generator.generate(loadClass(context.getArgs()[0]));  // currently, only one arg is supported
+
+            if (context.isSimulation()) {
+                System.out.println(result);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private Generator createGenerator(InvocationContext context) {
+        Generator generator;
+        if (context.getGeneratorType() == GeneratorType.CUSTOM) {
+            generator = GeneratorFactory.createGenerator(context.getGeneratorClassName());
+        } else {
+            generator = GeneratorFactory.createGenerator(context.getGeneratorType());
+        }
+        return generator;
     }
 
     private Class loadClass(String classToProcess) {
@@ -45,7 +53,7 @@ public class OMGen {
     }
 
     private static void abend() {
-        System.out.println("ERROR: Invalid parameters specified\n");
+        System.out.println("ERROR: Invalid parameters or arguments specified\n");
         cmdProcessor.dumpHelp();
         System.exit(-1);
     }

@@ -21,7 +21,7 @@ public class GeneratorFactoryTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreateNullGenerator() throws Exception {
-        Generator generator = GeneratorFactory.createGenerator(null);
+        Generator generator = GeneratorFactory.createGenerator((GeneratorType)null);
         assertNotNull(generator);
     }
 }

@@ -3,10 +3,10 @@ package com.omgen;
 import org.apache.commons.cli.*;
 
 public class CommandLineProcessor {
-    private static final String OPTION_GENERATOR = "g";
-    private static final String OPTION_SIMULATION = "s";
+    public static final String OPTION_GENERATOR = "g";
+    public static final String OPTION_SIMULATION = "s";
 
-    public boolean validArguments(CommandLine cmd) {
+    public boolean isValidArguments(CommandLine cmd) {
         if (cmd == null || cmd.getArgList().size() < 1) {
             return false;
         }

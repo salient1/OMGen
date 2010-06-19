@@ -69,7 +69,7 @@ public class DTypeVelocityGenerator implements Generator {
                 Class<?> varClass = beanMap.getType(key);
 
                 SetterMethod setterMethod = new SetterMethod(writeMethod.getName(), key,
-                             getFormattedType(varClass, writeMethod.getGenericParameterTypes()[0].toString()));
+                        getFormattedType(varClass, writeMethod.getGenericParameterTypes()[0].toString()));
 
                 setterMethods.add(setterMethod);
             }
@@ -77,26 +77,53 @@ public class DTypeVelocityGenerator implements Generator {
         return setterMethods;
     }
 
-    protected String getFormattedType(Class<?> varClass, final String generifiedParameterType) {
-        String formattedType;
 
-        if (varClass.isArray()) {
-            formattedType = generifiedParameterType.substring("class [L".length(), generifiedParameterType.length() - 1) + "[]";
+    /**
+     * Warning: package info is not available for array types for some reason...
+     */
+    protected String getFormattedType(Class<?> varClass, final String generifiedParameterType) {
+        boolean isGenericParameterType = generifiedParameterType.indexOf('<') > -1;
+
+        String formattedType;
+        if (isGenericParameterType) {
+            int startIndex = generifiedParameterType.indexOf('<');
+            String generic = generifiedParameterType.substring(startIndex);
+            formattedType = getSimplestClassName(varClass) + getSimplestClassNameForGeneric(generic);
         } else {
-            if (generifiedParameterType.startsWith("class ")) {
-               if (generifiedParameterType.startsWith("class java.lang.")) {
-                    formattedType = generifiedParameterType.substring("class java.lang.".length());
-                } else {
-                    formattedType = generifiedParameterType;
-                }
-            } else {
-                if (generifiedParameterType.startsWith("java.lang.")) {
-                    formattedType = generifiedParameterType.substring("java.lang.".length());
-                } else {
-                    formattedType = generifiedParameterType;
-                }
-            }
+            formattedType = getSimplestClassName(varClass);
         }
+
         return formattedType.replace("$", ".");  // for inner classes
+    }
+
+    /**
+     * Returns short class name for java.* classes, otherwise fully qualified class name.
+     */
+    protected String getSimplestClassName(Class<?> varClass) {
+        String simpleName = varClass.getSimpleName();
+        String fullName = varClass.getCanonicalName();
+
+        String formattedType;
+        if (fullName.startsWith("java.")) {
+            formattedType = simpleName;
+        } else {
+            formattedType = fullName;
+        }
+        return formattedType;
+    }
+
+    /**
+     * Returns short class name for java.* classes, otherwise fully qualified class name.
+     */
+    private String getSimplestClassNameForGeneric(String genericClassName) {
+        String formattedType;
+        if (genericClassName.startsWith("<java.")) {
+            int indexOfLastDot = genericClassName.lastIndexOf('.');
+            int indexOfGt = genericClassName.lastIndexOf('>');
+            formattedType = String.format("<%s>", genericClassName.substring(indexOfLastDot + 1, indexOfGt));
+        } else {
+            formattedType = genericClassName;
+        }
+        return formattedType;
     }
 }
