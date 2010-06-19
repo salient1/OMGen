@@ -1,0 +1,42 @@
+<project name="OMGen" default="dist" basedir=".">
+    <!-- set global properties for this build -->
+
+    <property name="jar.name" value="omgen"/>
+    <property name="src" location="src"/>
+    <property name="lib" location="lib"/>
+    <property name="build" location="build"/>
+    <property name="dist" location="dist"/>
+    <property name="test" location="test"/>
+    <property name="velocity" location="velocity"/>
+    <property name="samples" location="samples"/>
+
+    <path id="classpath">
+        <fileset dir="${lib}" includes="**/*.jar"/>
+    </path>
+
+    <target name="init">
+        <tstamp/>
+        <mkdir dir="${build}"/>
+    </target>
+
+    <target name="compile" depends="init" description="Compile source tree">
+        <javac srcdir="${src}" destdir="${build}" classpathref="classpath"/>
+    </target>
+
+    <target name="copy.resources" description="Copies resources for jar">
+        <copy todir="${build}" overwrite="true">
+            <fileset dir="${velocity}"/>
+        </copy>
+    </target>
+
+    <target name="dist" depends="clean,compile,copy.resources" description="Generate distribution">
+        <mkdir dir="${dist}/lib"/>
+
+        <jar jarfile="${dist}/lib/${jar.name}-${DSTAMP}.jar" basedir="${build}"/>
+    </target>
+
+    <target name="clean" description="clean up">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+</project>
