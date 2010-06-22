@@ -1,5 +1,6 @@
 package com.omgen;
 
+import com.omgen.discovery.ClassUtils;
 import com.omgen.generator.Generator;
 import com.omgen.generator.GeneratorFactory;
 import com.omgen.generator.GeneratorType;
@@ -24,6 +25,7 @@ public class OMGen {
     private void run(InvocationContext context) {
         Generator generator = createGenerator(context);
         try {
+            Class[] classes = ClassUtils.getClasses("com.omgen");
             String result = generator.generate(loadClass(context.getArgs()[0]));  // currently, only one arg is supported
 
             if (context.isSimulation()) {

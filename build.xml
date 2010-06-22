@@ -1,6 +1,4 @@
 <project name="OMGen" default="dist" basedir=".">
-    <!-- set global properties for this build -->
-
     <property name="jar.name" value="omgen"/>
     <property name="src" location="src"/>
     <property name="lib" location="lib"/>
