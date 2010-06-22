@@ -1,5 +1,6 @@
 package com.omgen.generator.builtin;
 
+import com.omgen.InvocationContext;
 import com.omgen.generator.Generator;
 import com.omgen.generator.util.VelocityGeneratorUtil;
 import org.apache.commons.beanutils.BeanMap;
@@ -15,13 +16,14 @@ import java.util.*;
  * Implementation of the D-Type object mother generator.
  */
 public class DTypeVelocityGenerator implements Generator {
+	private static final String DEFAULT_TEMPLATE = "en/dTypeObjectMother.vo";
 
-    public String generate(Class classToProcess) throws Exception {
-        VelocityContext context = getVelocityContext(classToProcess);
+	public String generate(Class classToProcess, InvocationContext invocationContext) throws Exception {
+        VelocityContext velocityContext = getVelocityContext(classToProcess);
 
-        addClassInfoToContext(classToProcess, context);
+        addClassInfoToContext(classToProcess, velocityContext);
 
-        return mergeVelocityTemplate(context);
+        return mergeVelocityTemplate(velocityContext, invocationContext);
     }
 
     protected VelocityContext getVelocityContext(Class classToProcess) throws Exception {
@@ -37,15 +39,23 @@ public class DTypeVelocityGenerator implements Generator {
         return properties;
     }
 
-    protected String mergeVelocityTemplate(VelocityContext context) throws Exception {
+    protected String mergeVelocityTemplate(VelocityContext velocityContext, InvocationContext invocationContext) throws Exception {
         StringWriter stringWriter = new StringWriter();
 
-        Velocity.mergeTemplate("en/dTypeObjectMother.vo", "UTF-8", context, stringWriter);
+		Velocity.mergeTemplate(getTemplate(invocationContext), "UTF-8", velocityContext, stringWriter);
 
         return stringWriter.toString();
     }
 
-    protected void addClassInfoToContext(Class<?> classToProcess, VelocityContext context) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+	private String getTemplate(InvocationContext invocationContext) {
+		String template = DEFAULT_TEMPLATE;
+		if (invocationContext.getTemplate() != null) {
+			template = invocationContext.getTemplate();
+		}
+		return template;
+	}
+
+	protected void addClassInfoToContext(Class<?> classToProcess, VelocityContext context) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         context.put("package", classToProcess.getPackage().getName());
         context.put("doClassName", classToProcess.getSimpleName());
         context.put("omClassName", getObjectMotherClassName(classToProcess));

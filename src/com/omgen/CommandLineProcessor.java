@@ -2,9 +2,9 @@ package com.omgen;
 
 import org.apache.commons.cli.*;
 
+import static com.omgen.generator.OptionSetting.*;
+
 public class CommandLineProcessor {
-    public static final String OPTION_GENERATOR = "g";
-    public static final String OPTION_SIMULATION = "s";
 
     public boolean isValidArguments(CommandLine cmd) {
         if (cmd == null || cmd.getArgList().size() < 1) {
@@ -35,8 +35,9 @@ public class CommandLineProcessor {
     private Options getCommandLineOptions() {
         Options options = new Options();
 
-        options.addOption(OPTION_GENERATOR, true, "generator type (args example: DEFAULT_VELOCITY_GENERATOR)");
-        options.addOption(OPTION_SIMULATION, false, "run simulation (output to console only)");
+        options.addOption(GENERATOR.optionKey(), true, "generator type (args example: DEFAULT_VELOCITY_GENERATOR)");
+        options.addOption(SIMULATION.optionKey(), false, "run simulation (output to console only)");
+        options.addOption(TEMPLATE.optionKey(), false, "override default template with supplied one");
         return options;
     }
 }

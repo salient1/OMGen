@@ -24,7 +24,7 @@ public class OMGen {
     private void run(InvocationContext context) {
         Generator generator = createGenerator(context);
         try {
-            String result = generator.generate(loadClass(context.getArgs()[0]));  // currently, only one arg is supported
+            String result = generator.generate(loadClass(context.getArgs()[0]), invocationContext);  // currently, only one arg is supported
 
             if (context.isSimulation()) {
                 System.out.println(result);
