@@ -22,13 +22,13 @@ public class OMGen {
         new OMGen().run(new InvocationContext(cmd));
     }
 
-    private void run(InvocationContext context) {
-        Generator generator = createGenerator(context);
+    private void run(InvocationContext invocationContext) {
+        Generator generator = createGenerator(invocationContext);
         try {
             Class[] classes = ClassUtils.getClasses("com.omgen");
-            String result = generator.generate(loadClass(context.getArgs()[0]));  // currently, only one arg is supported
+            String result = generator.generate(loadClass(invocationContext.getArgs()[0]), invocationContext);  // currently, only one arg is supported
 
-            if (context.isSimulation()) {
+            if (invocationContext.isSimulation()) {
                 System.out.println(result);
             }
         } catch (Exception e) {
