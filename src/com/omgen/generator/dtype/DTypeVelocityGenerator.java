@@ -1,16 +1,22 @@
-package com.omgen.generator.builtin;
+package com.omgen.generator.dtype;
 
 import com.omgen.InvocationContext;
 import com.omgen.generator.Generator;
+import com.omgen.generator.SetterMethod;
+import com.omgen.generator.exception.NoSetterMethodsException;
 import com.omgen.generator.util.VelocityGeneratorUtil;
-import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
 import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Implementation of the D-Type object mother generator.
@@ -55,7 +61,7 @@ public class DTypeVelocityGenerator implements Generator {
 		return template;
 	}
 
-	protected void addClassInfoToContext(Class<?> classToProcess, VelocityContext context) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+	protected void addClassInfoToContext(Class<?> classToProcess, VelocityContext context) {
         context.put("package", classToProcess.getPackage().getName());
         context.put("doClassName", classToProcess.getSimpleName());
         context.put("omClassName", getObjectMotherClassName(classToProcess));
@@ -68,20 +74,38 @@ public class DTypeVelocityGenerator implements Generator {
         return classToProcess.getSimpleName() + "ObjectMother";
     }
 
-    protected List<SetterMethod> buildMethodList(Class<?> clazz) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+    protected List<SetterMethod> buildMethodList(Class<?> clazz) {
+        List<Method> writeMethods = getWriteMethods(clazz);
         List<SetterMethod> setterMethods = new ArrayList<SetterMethod>();
+        for (Method method : writeMethods) {
+            if (method != null) {
+                Class<?> argumentClass = method.getParameterTypes()[0];
 
-        BeanMap beanMap = new BeanMap(clazz.newInstance());
-        for (Iterator<?> i = beanMap.keyIterator(); i.hasNext();) {
-            String key = (String) i.next();
-            Method writeMethod = beanMap.getWriteMethod(key);
-            if (writeMethod != null) {
-                Class<?> varClass = beanMap.getType(key);
-
-                SetterMethod setterMethod = new SetterMethod(writeMethod.getName(), key,
-                        getFormattedType(varClass, writeMethod.getGenericParameterTypes()[0].toString()));
+                SetterMethod setterMethod = new SetterMethod(method.getName(), getShortName(method),
+                        getFormattedType(argumentClass, method.getGenericParameterTypes()[0].toString()));
 
                 setterMethods.add(setterMethod);
+            }
+        }
+        if (setterMethods.size() == 0) {
+            throw new NoSetterMethodsException();
+        }
+        return setterMethods;
+    }
+
+    private String getShortName(Method method) {
+        return WordUtils.uncapitalize(method.getName().substring(3));
+    }
+
+    private List<Method> getWriteMethods(Class<?> clazz) {
+        List<Method> setterMethods = new ArrayList<Method>();
+        Method[] methods = clazz.getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.getName().startsWith("set")
+                    && method.getParameterTypes().length == 1
+                    && Modifier.isPublic(method.getModifiers())
+                    && method.getReturnType().getName().equals("void")) {
+                setterMethods.add(method);
             }
         }
         return setterMethods;

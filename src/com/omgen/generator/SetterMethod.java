@@ -1,4 +1,4 @@
-package com.omgen.generator.builtin;
+package com.omgen.generator;
 
 /**
  * Summary class containing all the info needed to build the typical method block in an OM.

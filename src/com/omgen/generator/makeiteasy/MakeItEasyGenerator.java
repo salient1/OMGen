@@ -1,5 +1,6 @@
-package com.omgen.generator.builtin;
+package com.omgen.generator.makeiteasy;
 
+import com.omgen.InvocationContext;
 import com.omgen.generator.Generator;
 
 /**
