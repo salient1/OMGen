@@ -1,7 +1,7 @@
 package com.omgen.generator;
 
-import com.omgen.generator.builtin.DTypeVelocityGenerator;
-import com.omgen.generator.builtin.MakeItEasyGenerator;
+import com.omgen.generator.dtype.DTypeVelocityGenerator;
+import com.omgen.generator.makeiteasy.MakeItEasyGenerator;
 
 /**
  *

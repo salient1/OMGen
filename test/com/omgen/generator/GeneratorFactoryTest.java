@@ -1,6 +1,6 @@
 package com.omgen.generator;
 
-import com.omgen.generator.builtin.DTypeVelocityGenerator;
+import com.omgen.generator.dtype.DTypeVelocityGenerator;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -1,2 +1,2 @@
 #* @implicitly included *#
-#* @vtlvariable name="method" type="com.omgen.generator.builtin.SetterMethod" *#
+#* @vtlvariable name="method" type="com.omgen.generator.SetterMethod" *#
