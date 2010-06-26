@@ -12,7 +12,7 @@ import java.util.List;
 /**
  *
  */
-public class ClassUtils {
+public class ClassFinderUtils {
     public static final char SLASH_CHAR = System.getProperty("file.separator").charAt(0);
     public static List<String> getClasses(String packageName, InvocationContext invocationContext) throws ClassNotFoundException {
 

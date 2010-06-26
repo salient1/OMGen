@@ -28,10 +28,10 @@ public class OMGen {
             for (String className : invocationContext.getClassList()) {
                 String result = null;
                 try {
-                    System.out.println("Processing class: " + className);
+                    System.out.print("Processing class: " + className);
                     result = generator.generate(loadClass(className), invocationContext);
                 } catch (NoSetterMethodsException e) {
-                    System.out.println("Class: " + className + " has no setter methods so no OM will be created for it.");
+                    System.out.println("...no setter methods found, skipped.");
                 }
 
                 if (invocationContext.isSimulation() && result != null) {

@@ -8,7 +8,9 @@ import org.apache.commons.cli.Option;
 public enum OptionSetting {
 	GENERATOR("g"),
 	SIMULATION("s"),
-	TEMPLATE("t");
+	TEMPLATE("t"),
+    PACKAGE("p"),
+    SCAN_SUBPACAKGES("ss");
 
 	private final String optionKey;
 

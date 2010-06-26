@@ -5,11 +5,14 @@
 package $package;
 
 public class $omClassName {
-    private $doClassName $doName = new $doClassName();
+    private $doClassName $doName;
 
-    public static $omClassName with() {
+#foreach($constructor in $constructors)
+    public static $omClassName with(#injectWithArguments($constructor)) {
+        $doName = new $doClassName(#injectConstructorArguments($constructor));
         return new $omClassName();
     }
+#end
 
     public $doClassName create() {
         return $doName;
@@ -23,3 +26,10 @@ public class $omClassName {
 #end
 }
 
+#macro(injectWithArguments $constructor)
+#foreach($parameterInfo in $constructor.parameterInfos)${parameterInfo.argType} ${parameterInfo.argName}#if ($velocityCount < $constructor.parameterInfos.size()), #end#end
+#end
+
+#macro(injectConstructorArguments $constructor)
+#foreach($parameterInfo in $constructor.parameterInfos)${parameterInfo.argName}#if ($velocityCount < $constructor.parameterInfos.size()), #end#end
+#end

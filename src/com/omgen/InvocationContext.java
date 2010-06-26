@@ -1,6 +1,6 @@
 package com.omgen;
 
-import com.omgen.discovery.ClassUtils;
+import com.omgen.discovery.ClassFinderUtils;
 import com.omgen.generator.GeneratorType;
 import com.omgen.generator.OptionSetting;
 import com.omgen.generator.dtype.DTypeVelocityGenerator;
@@ -16,6 +16,7 @@ import java.util.List;
 public class InvocationContext {
     private boolean simulation;
     private boolean scanSubPackages;
+    private String omPackageName;
     private String generatorClassName = DTypeVelocityGenerator.class.getName();
 	private String template;
     private GeneratorType generatorType;
@@ -37,6 +38,14 @@ public class InvocationContext {
 				case TEMPLATE:
 					template = option.getValue();
 					break;
+
+                case SCAN_SUBPACAKGES:
+                    scanSubPackages = true;
+                    break;
+
+                case PACKAGE:
+                    omPackageName = option.getValue();
+                    break;
 			}
         }
         generatorType = GeneratorType.of(getGeneratorClassName());
@@ -50,7 +59,7 @@ public class InvocationContext {
         for (String arg : args) {
             if (arg.endsWith(".")) {
                 try {
-                    classes.addAll(ClassUtils.getClasses(arg, this));
+                    classes.addAll(ClassFinderUtils.getClasses(arg, this));
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -59,6 +68,14 @@ public class InvocationContext {
             }
         }
         return classes;
+    }
+
+    public String getOmPackageName() {
+        return omPackageName;
+    }
+
+    public void setOmPackageName(String omPackageName) {
+        this.omPackageName = omPackageName;
     }
 
     public List<String> getClassList() {

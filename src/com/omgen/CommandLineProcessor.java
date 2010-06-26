@@ -16,7 +16,7 @@ public class CommandLineProcessor {
 
     public void dumpHelp() {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("OMGen <args> ClassToProcess", getCommandLineOptions());
+        formatter.printHelp("OMGen <args> ClassToProcess or package.name.", getCommandLineOptions());
     }
 
     public CommandLine parseCommandLine(String[] args) {
@@ -36,8 +36,10 @@ public class CommandLineProcessor {
         Options options = new Options();
 
         options.addOption(GENERATOR.optionKey(), true, "generator type (args example: DEFAULT_VELOCITY_GENERATOR)");
+        options.addOption(PACKAGE.optionKey(), true, "package name to inject into generated OMs");
         options.addOption(SIMULATION.optionKey(), false, "run simulation (output to console only)");
         options.addOption(TEMPLATE.optionKey(), false, "override default template with supplied one");
+        options.addOption(SCAN_SUBPACAKGES.optionKey(), false, "indicates subpackages should be traversed when a package is given");
         return options;
     }
 }

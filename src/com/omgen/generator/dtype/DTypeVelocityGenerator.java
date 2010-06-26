@@ -1,21 +1,15 @@
 package com.omgen.generator.dtype;
 
 import com.omgen.InvocationContext;
+import com.omgen.discovery.MethodDiscoveryUtils;
 import com.omgen.generator.Generator;
-import com.omgen.generator.SetterMethod;
-import com.omgen.generator.exception.NoSetterMethodsException;
 import com.omgen.generator.util.VelocityGeneratorUtil;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
 import java.io.StringWriter;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -27,7 +21,7 @@ public class DTypeVelocityGenerator implements Generator {
 	public String generate(Class classToProcess, InvocationContext invocationContext) throws Exception {
         VelocityContext velocityContext = getVelocityContext(classToProcess);
 
-        addClassInfoToContext(classToProcess, velocityContext);
+        addClassInfoToContext(velocityContext, invocationContext, classToProcess);
 
         return mergeVelocityTemplate(velocityContext, invocationContext);
     }
@@ -61,103 +55,29 @@ public class DTypeVelocityGenerator implements Generator {
 		return template;
 	}
 
-	protected void addClassInfoToContext(Class<?> classToProcess, VelocityContext context) {
-        context.put("package", classToProcess.getPackage().getName());
-        context.put("doClassName", classToProcess.getSimpleName());
-        context.put("omClassName", getObjectMotherClassName(classToProcess));
-        context.put("doName", StringUtils.uncapitalize(classToProcess.getSimpleName()));
-        context.put("methods", buildMethodList(classToProcess));
-        context.put("date", (new Date()).toString());
+	protected void addClassInfoToContext(VelocityContext velocityContext, InvocationContext invocationContext, Class<?> classToProcess) {
+        velocityContext.put("package", getPackageName(classToProcess, invocationContext));
+        velocityContext.put("doClassName", classToProcess.getSimpleName());
+        velocityContext.put("omClassName", getObjectMotherClassName(classToProcess));
+        velocityContext.put("doName", StringUtils.uncapitalize(classToProcess.getSimpleName()));
+        velocityContext.put("methods", MethodDiscoveryUtils.buildMethodList(classToProcess));
+        velocityContext.put("constructors", MethodDiscoveryUtils.buildConstructorList(classToProcess));
+        velocityContext.put("date", (new Date()).toString());
+    }
+
+    private String getPackageName(Class<?> classToProcess, InvocationContext invocationContext) {
+        return invocationContext.getOmPackageName() != null ? invocationContext.getOmPackageName() : classToProcess.getPackage().getName();
     }
 
     protected String getObjectMotherClassName(Class<?> classToProcess) {
         return classToProcess.getSimpleName() + "ObjectMother";
     }
 
-    protected List<SetterMethod> buildMethodList(Class<?> clazz) {
-        List<Method> writeMethods = getWriteMethods(clazz);
-        List<SetterMethod> setterMethods = new ArrayList<SetterMethod>();
-        for (Method method : writeMethods) {
-            if (method != null) {
-                Class<?> argumentClass = method.getParameterTypes()[0];
 
-                SetterMethod setterMethod = new SetterMethod(method.getName(), getShortName(method),
-                        getFormattedType(argumentClass, method.getGenericParameterTypes()[0].toString()));
-
-                setterMethods.add(setterMethod);
-            }
-        }
-        if (setterMethods.size() == 0) {
-            throw new NoSetterMethodsException();
-        }
-        return setterMethods;
-    }
-
-    private String getShortName(Method method) {
-        return WordUtils.uncapitalize(method.getName().substring(3));
-    }
-
-    private List<Method> getWriteMethods(Class<?> clazz) {
-        List<Method> setterMethods = new ArrayList<Method>();
-        Method[] methods = clazz.getDeclaredMethods();
-        for (Method method : methods) {
-            if (method.getName().startsWith("set")
-                    && method.getParameterTypes().length == 1
-                    && Modifier.isPublic(method.getModifiers())
-                    && method.getReturnType().getName().equals("void")) {
-                setterMethods.add(method);
-            }
-        }
-        return setterMethods;
-    }
 
 
     /**
      * Warning: package info is not available for array types for some reason...
      */
-    protected String getFormattedType(Class<?> varClass, final String generifiedParameterType) {
-        boolean isGenericParameterType = generifiedParameterType.indexOf('<') > -1;
 
-        String formattedType;
-        if (isGenericParameterType) {
-            int startIndex = generifiedParameterType.indexOf('<');
-            String generic = generifiedParameterType.substring(startIndex);
-            formattedType = getSimplestClassName(varClass) + getSimplestClassNameForGeneric(generic);
-        } else {
-            formattedType = getSimplestClassName(varClass);
-        }
-
-        return formattedType.replace("$", ".");  // for inner classes
-    }
-
-    /**
-     * Returns short class name for java.* classes, otherwise fully qualified class name.
-     */
-    protected String getSimplestClassName(Class<?> varClass) {
-        String simpleName = varClass.getSimpleName();
-        String fullName = varClass.getCanonicalName();
-
-        String formattedType;
-        if (fullName.startsWith("java.")) {
-            formattedType = simpleName;
-        } else {
-            formattedType = fullName;
-        }
-        return formattedType;
-    }
-
-    /**
-     * Returns short class name for java.* classes, otherwise fully qualified class name.
-     */
-    private String getSimplestClassNameForGeneric(String genericClassName) {
-        String formattedType;
-        if (genericClassName.startsWith("<java.")) {
-            int indexOfLastDot = genericClassName.lastIndexOf('.');
-            int indexOfGt = genericClassName.lastIndexOf('>');
-            formattedType = String.format("<%s>", genericClassName.substring(indexOfLastDot + 1, indexOfGt));
-        } else {
-            formattedType = genericClassName;
-        }
-        return formattedType;
-    }
 }

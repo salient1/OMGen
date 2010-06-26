@@ -34,7 +34,7 @@ public class ClassUtilsTest {
         InvocationContext invocationContext = spy(new InvocationContext(commandLine));
 
         when(invocationContext.isScanSubPackages()).thenReturn(true);
-        List<String> classes = ClassUtils.getClasses("com.omgen", invocationContext);
+        List<String> classes = ClassFinderUtils.getClasses("com.omgen", invocationContext);
         assertNotNull(classes);
     }
 }

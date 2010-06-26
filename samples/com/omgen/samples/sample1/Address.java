@@ -1,5 +1,7 @@
 package com.omgen.samples.sample1;
 
+import java.util.List;
+
 /**
  *
  */
@@ -8,7 +10,14 @@ public class Address {
     private String street2;
     private String city;
     private String state;
-    private String zip;
+    private List<String> zips;
+
+    public Address() {}
+
+    public Address(String state, List<String> zips) {
+        this.state = state;
+        this.zips = zips;
+    }
 
     public String getStreet1() {
         return street1;
@@ -42,11 +51,11 @@ public class Address {
         this.state = state;
     }
 
-    public String getZip() {
-        return zip;
+    public List<String> getZips() {
+        return zips;
     }
 
-    public void setZip(String zip) {
-        this.zip = zip;
+    public void setZips(List<String> zips) {
+        this.zips = zips;
     }
 }
