@@ -1,12 +1,9 @@
 package com.omgen.discovery;
 
-import com.omgen.generator.ConstructorInfo;
-import com.omgen.generator.ParameterInfo;
 import com.omgen.generator.SetterMethod;
 import com.omgen.generator.exception.NoSetterMethodsException;
 import org.apache.commons.lang.WordUtils;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -15,34 +12,8 @@ import java.util.List;
 /**
  *
  */
-public class MethodDiscoveryUtils {
-    public static List<ConstructorInfo> buildConstructorList(Class<?> clazz) {
-        List<ConstructorInfo> constructors = new ArrayList<ConstructorInfo>();
-        for (Constructor<?> constructor : clazz.getConstructors()) {
-            if (Modifier.isPublic(constructor.getModifiers())) {
-                buildConstructorInfo(constructors, constructor);
-            }
-        }
-        return constructors;        
-    }
-
-    private static void buildConstructorInfo(List<ConstructorInfo> constructors, Constructor<?> constructor) {
-        ConstructorInfo constructorInfo = new ConstructorInfo();
-        if (constructor.getParameterTypes().length > 0) {
-            List<ParameterInfo> parameterInfos = new ArrayList<ParameterInfo>();
-            for (int i = 0, parameterTypesLength = constructor.getParameterTypes().length; i < parameterTypesLength; i++) {
-                Class<?> parmClass = constructor.getParameterTypes()[i];
-                ParameterInfo parameterInfo = new ParameterInfo();
-                parameterInfo.setArgType(parmClass.getName());
-                parameterInfo.setArgName(WordUtils.uncapitalize(parmClass.getSimpleName()) + i);
-                parameterInfos.add(parameterInfo);
-            }
-            constructorInfo.setParameterInfos(parameterInfos);
-            constructors.add(constructorInfo);
-        } else {
-            constructors.add(0, constructorInfo); // make zero arg constructors come first
-        }
-    }
+public final class MethodDiscoveryUtils {
+    private MethodDiscoveryUtils() {}
 
     public static List<SetterMethod> buildMethodList(Class<?> clazz) {
         List<Method> writeMethods = getWriteMethods(clazz);
@@ -88,9 +59,9 @@ public class MethodDiscoveryUtils {
         if (isGenericParameterType) {
             int startIndex = generifiedParameterType.indexOf('<');
             String generic = generifiedParameterType.substring(startIndex);
-            formattedType = getSimplestClassName(varClass) + getSimplestClassNameForGeneric(generic);
+            formattedType = varClass.getSimpleName() + getSimplestClassNameForGeneric(generic);
         } else {
-            formattedType = getSimplestClassName(varClass);
+            formattedType = varClass.getSimpleName();
         }
 
         return formattedType.replace("$", ".");  // for inner classes
@@ -104,7 +75,7 @@ public class MethodDiscoveryUtils {
         String fullName = varClass.getCanonicalName();
 
         String formattedType;
-        if (fullName.startsWith("java.")) {
+        if (fullName.startsWith(ImportUtils.AUTO_IMPORTED_PACKAGE)) {
             formattedType = simpleName;
         } else {
             formattedType = fullName;
@@ -117,13 +88,11 @@ public class MethodDiscoveryUtils {
      */
     private static String getSimplestClassNameForGeneric(String genericClassName) {
         String formattedType;
-        if (genericClassName.startsWith("<java.")) {
-            int indexOfLastDot = genericClassName.lastIndexOf('.');
-            int indexOfGt = genericClassName.lastIndexOf('>');
-            formattedType = String.format("<%s>", genericClassName.substring(indexOfLastDot + 1, indexOfGt));
-        } else {
-            formattedType = genericClassName;
-        }
+        int indexOfLastDot = genericClassName.lastIndexOf('.');
+        int indexOfGt = genericClassName.lastIndexOf('>');
+        formattedType = String.format("<%s>", genericClassName.substring(indexOfLastDot + 1, indexOfGt));
         return formattedType;
     }
+
+
 }

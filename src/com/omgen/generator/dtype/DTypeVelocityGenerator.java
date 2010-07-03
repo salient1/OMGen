@@ -1,7 +1,6 @@
 package com.omgen.generator.dtype;
 
 import com.omgen.InvocationContext;
-import com.omgen.discovery.MethodDiscoveryUtils;
 import com.omgen.generator.Generator;
 import com.omgen.generator.util.VelocityGeneratorUtil;
 import org.apache.commons.lang.StringUtils;
@@ -11,6 +10,10 @@ import org.apache.velocity.app.Velocity;
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.Properties;
+
+import static com.omgen.discovery.ConstructorUtils.*;
+import static com.omgen.discovery.ImportUtils.*;
+import static com.omgen.discovery.MethodDiscoveryUtils.*;
 
 /**
  * Implementation of the D-Type object mother generator.
@@ -60,8 +63,9 @@ public class DTypeVelocityGenerator implements Generator {
         velocityContext.put("doClassName", classToProcess.getSimpleName());
         velocityContext.put("omClassName", getObjectMotherClassName(classToProcess));
         velocityContext.put("doName", StringUtils.uncapitalize(classToProcess.getSimpleName()));
-        velocityContext.put("methods", MethodDiscoveryUtils.buildMethodList(classToProcess));
-        velocityContext.put("constructors", MethodDiscoveryUtils.buildConstructorList(classToProcess));
+        velocityContext.put("methods", buildMethodList(classToProcess));
+        velocityContext.put("constructors", buildConstructorList(classToProcess));
+        velocityContext.put("imports", getRequiredImports(classToProcess, getWriteMethods(classToProcess)));
         velocityContext.put("date", (new Date()).toString());
     }
 

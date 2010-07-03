@@ -5,6 +5,11 @@ import com.omgen.generator.GeneratorFactory;
 import com.omgen.generator.GeneratorType;
 import com.omgen.generator.exception.NoSetterMethodsException;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.io.IOUtils;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  * Main entry point to generator.
@@ -27,20 +32,41 @@ public class OMGen {
         try {
             for (String className : invocationContext.getClassList()) {
                 String result = null;
+                Class classToProcess = null;
                 try {
-                    System.out.print("Processing class: " + className);
-                    result = generator.generate(loadClass(className), invocationContext);
+                    System.out.print("\nProcessing class: " + className + "...");
+                    classToProcess = loadClass(className);
+                    result = generator.generate(classToProcess, invocationContext);
                 } catch (NoSetterMethodsException e) {
-                    System.out.println("...no setter methods found, skipped.");
+                    System.out.println("no setter methods found, skipped.");
                 }
 
-                if (invocationContext.isSimulation() && result != null) {
-                    System.out.println(result);
+                if (result != null) {
+                    if (invocationContext.isSimulation()) {
+                        System.out.println(result);
+                    } else {
+                        writeFile(invocationContext, result, classToProcess);
+                    }
                 }
             }
-
+            System.out.println("\nFinished.");
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void writeFile(InvocationContext invocationContext, String result, Class clazz) {
+        FileWriter fileWriter = null;
+        File file = new File(clazz.getSimpleName() + "ObjectMother.java");
+
+        try {
+            System.out.print("Writing file: "  + file.getCanonicalPath());
+            fileWriter = new FileWriter(file);
+            fileWriter.write(result);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            IOUtils.closeQuietly(fileWriter);
         }
     }
 

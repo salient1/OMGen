@@ -4,16 +4,25 @@
  */
 package $package;
 
+#foreach($import in $imports)
+import ${import};
+#end
+
 public class $omClassName {
     private $doClassName $doName;
 
 #foreach($constructor in $constructors)
-    public static $omClassName with(#injectWithArguments($constructor)) {
+    private $omClassName(#injectWithArguments($constructor)) {
         $doName = new $doClassName(#injectConstructorArguments($constructor));
-        return new $omClassName();
     }
-#end
 
+#end
+#foreach($constructor in $constructors)
+    public static $omClassName with(#injectWithArguments($constructor)) {
+        return new $omClassName(#injectConstructorArguments($constructor));
+    }
+
+#end
     public $doClassName create() {
         return $doName;
     }
