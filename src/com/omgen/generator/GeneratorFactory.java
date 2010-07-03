@@ -17,7 +17,6 @@ public class GeneratorFactory {
     static {
         generators.put(DEFAULT_VELOCITY_GENERATOR, DTypeVelocityGenerator.class);
         generators.put(MAKE_IT_EASY_GENERATOR, MakeItEasyGenerator.class);
-
     }
 
     public static Generator createGenerator(GeneratorType generatorType) {

@@ -57,7 +57,7 @@ public class InvocationContext {
     private List<String> computeClassesToProcess(String[] args) {
         List<String> classes = new ArrayList<String>();
         for (String arg : args) {
-            if (arg.endsWith(".")) {
+            if (isArgAPackage(arg)) {
                 try {
                     classes.addAll(ClassFinderUtils.getClasses(arg, this));
                 } catch (ClassNotFoundException e) {
@@ -70,45 +70,25 @@ public class InvocationContext {
         return classes;
     }
 
-    public String getOmPackageName() {
-        return omPackageName;
+    private boolean isArgAPackage(String arg) {
+        return arg.endsWith(".");
     }
 
-    public void setOmPackageName(String omPackageName) {
-        this.omPackageName = omPackageName;
+    public String getOmPackageName() {
+        return omPackageName;
     }
 
     public List<String> getClassList() {
         return classList;
     }
 
-    public void setClassList(List<String> classList) {
-        this.classList = classList;
-    }
-
     public boolean isScanSubPackages() {
         return scanSubPackages;
     }
 
-    public void setScanSubPackages(boolean scanSubPackages) {
-        this.scanSubPackages = scanSubPackages;
-    }
-
-    private boolean isOption(Option option, String optionKey) {
-		return option.getOpt().equals(optionKey);
-	}
-
 	public String getTemplate() {
 		return template;
 	}
-
-	public void setTemplate(String template) {
-		this.template = template;
-	}
-
-	public String[] getArgs() {
-        return args;
-    }
 
     public boolean isSimulation() {
         return simulation;

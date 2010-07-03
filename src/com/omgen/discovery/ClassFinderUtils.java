@@ -12,10 +12,12 @@ import java.util.List;
 /**
  *
  */
-public class ClassFinderUtils {
+public final class ClassFinderUtils {
     public static final char SLASH_CHAR = System.getProperty("file.separator").charAt(0);
-    public static List<String> getClasses(String packageName, InvocationContext invocationContext) throws ClassNotFoundException {
 
+    private ClassFinderUtils() {}
+
+    public static List<String> getClasses(String packageName, InvocationContext invocationContext) throws ClassNotFoundException {
         ArrayList<String> classes;
 
         // Get a File object for the package
@@ -39,7 +41,7 @@ public class ClassFinderUtils {
         // Get the list of the files contained in the package
         File[] files = directory.listFiles();
         for (File file : files) {
-            // we are only interested in .class files
+            // we are only interested in .class files for non-inner classes
             String filename = file.getName();
             if (filename.endsWith(".class") && !filename.contains("$")) {
                 String slashyClassName = null;
@@ -61,20 +63,13 @@ public class ClassFinderUtils {
         return slashyString.replace(SLASH_CHAR, '.');
     }
 
-    private static File convertPackageToDir(String pckgname, File directory, String path) throws ClassNotFoundException {
+    private static File convertPackageToDir(String packageName, File directory, String path) throws ClassNotFoundException {
         try {
-            ClassLoader cld = Thread.currentThread().getContextClassLoader();
-            if (cld == null) {
-                throw new ClassNotFoundException("Can't get class loader.");
-            }
-            URL resource = cld.getResource(path);
-            if (resource == null) {
-                throw new ClassNotFoundException("No resource for " + path);
-            }
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            URL resource = classLoader.getResource(path);
             directory = new File(resource.getFile());
         } catch (NullPointerException x) {
-            throw new ClassNotFoundException(pckgname + " (" + directory
-                    + ") does not appear to be a valid package");
+            throw new ClassNotFoundException(packageName + " (" + directory + ") does not appear to be a valid package");
         }
         return directory;
     }

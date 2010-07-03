@@ -6,12 +6,8 @@ import static com.omgen.generator.OptionSetting.*;
 
 public class CommandLineProcessor {
 
-    public boolean isValidArguments(CommandLine cmd) {
-        if (cmd == null || cmd.getArgList().size() < 1) {
-            return false;
-        }
-
-        return true;
+    public boolean isValidInvocation(CommandLine cmd) {
+        return !(cmd == null || cmd.getArgList().size() < 1);
     }
 
     public void dumpHelp() {

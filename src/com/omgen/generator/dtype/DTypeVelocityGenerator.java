@@ -65,7 +65,7 @@ public class DTypeVelocityGenerator implements Generator {
         velocityContext.put("doName", StringUtils.uncapitalize(classToProcess.getSimpleName()));
         velocityContext.put("methods", buildMethodList(classToProcess));
         velocityContext.put("constructors", buildConstructorList(classToProcess));
-        velocityContext.put("imports", getRequiredImports(classToProcess, getWriteMethods(classToProcess)));
+        velocityContext.put("imports", getRequiredImports(getWriteMethods(classToProcess)));
         velocityContext.put("date", (new Date()).toString());
     }
 

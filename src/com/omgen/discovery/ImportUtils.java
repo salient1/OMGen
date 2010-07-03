@@ -5,12 +5,15 @@ import org.apache.commons.lang.ClassUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class ImportUtils {
+public final class ImportUtils {
     public static final String AUTO_IMPORTED_PACKAGE = "java.lang";
 
-    public static List<String> getRequiredImports(Class<?> clazz, List<Method> writeMethods) {
+    private ImportUtils() {}
+
+    public static List<String> getRequiredImports(List<Method> writeMethods) {
         List<String> imports = new ArrayList<String>();
         for (Method writeMethod : writeMethods) {
             for (Class<?> paramType : writeMethod.getParameterTypes()) {
@@ -29,7 +32,7 @@ public class ImportUtils {
                 }
             }
         }
-        return imports;
+        return Collections.unmodifiableList(imports);
     }
 
     private static boolean isValidGenericImport(List<String> imports, String importGeneric) {

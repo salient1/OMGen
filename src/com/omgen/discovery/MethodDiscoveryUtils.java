@@ -42,14 +42,18 @@ public final class MethodDiscoveryUtils {
         List<Method> setterMethods = new ArrayList<Method>();
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
-            if (method.getName().startsWith("set")
-                    && method.getParameterTypes().length == 1
-                    && Modifier.isPublic(method.getModifiers())
-                    && method.getReturnType().getName().equals("void")) {
+            if (isSetter(method)) {
                 setterMethods.add(method);
             }
         }
         return setterMethods;
+    }
+
+    public static boolean isSetter(Method method) {
+        return method.getName().startsWith("set")
+                && method.getParameterTypes().length == 1
+                && Modifier.isPublic(method.getModifiers())
+                && method.getReturnType().getName().equals("void");
     }
 
     protected static String getFormattedType(Class<?> varClass, final String generifiedParameterType) {

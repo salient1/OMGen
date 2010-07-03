@@ -21,7 +21,7 @@ public class OMGen {
     public static void main(String[] args) {
         CommandLine cmd = cmdProcessor.parseCommandLine(args);
 
-        if (!cmdProcessor.isValidArguments(cmd))
+        if (!cmdProcessor.isValidInvocation(cmd))
             abend();
 
         new OMGen().run(new InvocationContext(cmd));
@@ -31,23 +31,13 @@ public class OMGen {
         Generator generator = createGenerator(invocationContext);
         try {
             for (String className : invocationContext.getClassList()) {
-                String result = null;
-                Class classToProcess = null;
-                try {
-                    System.out.print("\nProcessing class: " + className + "...");
-                    classToProcess = loadClass(className);
-                    result = generator.generate(classToProcess, invocationContext);
-                } catch (NoSetterMethodsException e) {
-                    System.out.println("no setter methods found, skipped.");
-                }
+                System.out.print("\nProcessing class: " + className + "...");
 
-                if (result != null) {
-                    if (invocationContext.isSimulation()) {
-                        System.out.println(result);
-                    } else {
-                        writeFile(invocationContext, result, classToProcess);
-                    }
-                }
+                Class classToProcess = loadClass(className);
+
+                String result = invokeGenerator(invocationContext, generator, classToProcess);
+
+                writeResult(invocationContext.isSimulation(), result, classToProcess);
             }
             System.out.println("\nFinished.");
         } catch (Exception e) {
@@ -55,7 +45,27 @@ public class OMGen {
         }
     }
 
-    private void writeFile(InvocationContext invocationContext, String result, Class clazz) {
+    private String invokeGenerator(InvocationContext invocationContext, Generator generator, Class classToProcess) throws Exception {
+        String result = null;
+        try {
+            result = generator.generate(classToProcess, invocationContext);
+        } catch (NoSetterMethodsException e) {
+            System.out.println("no setter methods found, skipped.");
+        }
+        return result;
+    }
+
+    private void writeResult(boolean writeToConsole, String result, Class classToProcess) {
+        if (result != null) {
+            if (writeToConsole) {
+                System.out.println(result);
+            } else {
+                writeFile(result, classToProcess);
+            }
+        }
+    }
+
+    private void writeFile(String result, Class clazz) {
         FileWriter fileWriter = null;
         File file = new File(clazz.getSimpleName() + "ObjectMother.java");
 
