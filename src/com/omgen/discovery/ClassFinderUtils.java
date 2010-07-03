@@ -38,25 +38,44 @@ public final class ClassFinderUtils {
     private static ArrayList<String> buildClassList(String rootPackage, boolean scanSubPackages, File directory) throws ClassNotFoundException {
         ArrayList<String> classes = new ArrayList<String>();
 
-        // Get the list of the files contained in the package
         File[] files = directory.listFiles();
         for (File file : files) {
-            // we are only interested in .class files for non-inner classes
+            // we are only interested in .class files that are non-inner classes
             String filename = file.getName();
-            if (filename.endsWith(".class") && !filename.contains("$")) {
-                String slashyClassName = null;
-                try {
-                    slashyClassName = slashesToDots(file.getCanonicalPath().substring(0, file.getCanonicalPath().length() - 6));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                String trimmedClassName = slashyClassName.substring(slashyClassName.lastIndexOf(rootPackage), slashyClassName.length());
-                classes.add(trimmedClassName);
+            if (isClassFile(filename) && !isInnerClass(filename)) {
+                String fullyQualifiedClassName = getFullyQualifiedClassName(rootPackage, file);
+                classes.add(fullyQualifiedClassName);
             } else if (scanSubPackages && file.isDirectory()) {
                 classes.addAll(buildClassList(rootPackage, scanSubPackages, file));
             }
         }
         return classes;
+    }
+
+    private static String getFullyQualifiedClassName(String rootPackage, File file) {
+        String slashyClassName = null;
+        try {
+            slashyClassName = slashesToDots(getFullyQualifiedClassName(file));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return stripRootPath(rootPackage, slashyClassName); // leaves you with just package and classname
+    }
+
+    private static String stripRootPath(String rootPackage, String slashyClassName) {
+        return slashyClassName.substring(slashyClassName.lastIndexOf(rootPackage), slashyClassName.length());
+    }
+
+    private static String getFullyQualifiedClassName(File file) throws IOException {
+        return file.getCanonicalPath().substring(0, file.getCanonicalPath().length() - 6);
+    }
+
+    private static boolean isInnerClass(String filename) {
+        return filename.contains("$");
+    }
+
+    private static boolean isClassFile(String filename) {
+        return filename.endsWith(".class");
     }
 
     private static String slashesToDots(String slashyString) {
