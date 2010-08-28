@@ -10,10 +10,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class ConstructorUtils {
-    private ConstructorUtils() {}
+public class ConstructorFinder {
+    private Class clazz;
 
-    public static List<ConstructorInfo> buildConstructorList(Class<?> clazz) {
+    public ConstructorFinder(Class clazz) {
+        this.clazz = clazz;
+    }
+
+    public List<ConstructorInfo> findConstructors() {
         List<ConstructorInfo> constructors = new ArrayList<ConstructorInfo>();
         for (Constructor<?> constructor : clazz.getConstructors()) {
             if (isPublic(constructor)) {
@@ -23,11 +27,11 @@ public final class ConstructorUtils {
         return Collections.unmodifiableList(constructors);
     }
 
-    public static boolean isPublic(Constructor<?> constructor) {
+    public boolean isPublic(Constructor<?> constructor) {
         return Modifier.isPublic(constructor.getModifiers());
     }
 
-    private static void buildConstructorInfo(List<ConstructorInfo> constructors, Constructor<?> constructor) {
+    private void buildConstructorInfo(List<ConstructorInfo> constructors, Constructor<?> constructor) {
         ConstructorInfo constructorInfo = new ConstructorInfo();
         if (constructor.getParameterTypes().length > 0) {
             List<ParameterInfo> parameterInfos = buildParameterInfos(constructor);
@@ -38,7 +42,7 @@ public final class ConstructorUtils {
         }
     }
 
-    private static List<ParameterInfo> buildParameterInfos(Constructor<?> constructor) {
+    private List<ParameterInfo> buildParameterInfos(Constructor<?> constructor) {
         List<ParameterInfo> parameterInfos = new ArrayList<ParameterInfo>();
         for (int i = 0, parameterTypesLength = constructor.getParameterTypes().length; i < parameterTypesLength; i++) {
             Class<?> parmClass = constructor.getParameterTypes()[i];

@@ -51,10 +51,10 @@ public class InvocationContext {
         generatorType = GeneratorType.of(getGeneratorClassName());
 
         args = cmd.getArgs();
-        classList.addAll(computeClassesToProcess(args));
+        classList.addAll(classesToProcess(args));
     }
 
-    private List<String> computeClassesToProcess(String[] args) {
+    private List<String> classesToProcess(String[] args) {
         List<String> classes = new ArrayList<String>();
         for (String arg : args) {
             if (isArgAPackage(arg)) {

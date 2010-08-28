@@ -10,13 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * key test
+ *
  */
-public final class MethodDiscoveryUtils {
-    private MethodDiscoveryUtils() {}
+public class MethodFinder {
+    private Class clazz;
 
-    public static List<SetterMethod> buildMethodList(Class<?> clazz) {
-        List<Method> writeMethods = getWriteMethods(clazz);
+    public MethodFinder(Class clazz) {
+        this.clazz = clazz;
+    }
+
+    public List<SetterMethod> findSetterMethods() {
+        List<Method> writeMethods = getWriteMethods();
         List<SetterMethod> setterMethods = new ArrayList<SetterMethod>();
         for (Method method : writeMethods) {
             if (method != null) {
@@ -34,11 +38,11 @@ public final class MethodDiscoveryUtils {
         return setterMethods;
     }
 
-    public static String getShortName(Method method) {
+    public String getShortName(Method method) {
         return WordUtils.uncapitalize(method.getName().substring(3));
     }
 
-    public static List<Method> getWriteMethods(Class<?> clazz) {
+    public List<Method> getWriteMethods() {
         List<Method> setterMethods = new ArrayList<Method>();
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
@@ -49,14 +53,14 @@ public final class MethodDiscoveryUtils {
         return setterMethods;
     }
 
-    public static boolean isSetter(Method method) {
+    public boolean isSetter(Method method) {
         return method.getName().startsWith("set")
                 && method.getParameterTypes().length == 1
                 && Modifier.isPublic(method.getModifiers())
                 && method.getReturnType().getName().equals("void");
     }
 
-    protected static String getFormattedType(Class<?> varClass, final String generifiedParameterType) {
+    protected String getFormattedType(Class<?> varClass, final String generifiedParameterType) {
         boolean isGenericParameterType = generifiedParameterType.indexOf('<') > -1;
 
         String formattedType;
@@ -74,12 +78,12 @@ public final class MethodDiscoveryUtils {
     /**
      * Returns short class name for java.* classes, otherwise fully qualified class name.
      */
-    protected static String getSimplestClassName(Class<?> varClass) {
+    protected String getSimplestClassName(Class<?> varClass) {
         String simpleName = varClass.getSimpleName();
         String fullName = varClass.getCanonicalName();
 
         String formattedType;
-        if (fullName.startsWith(ImportUtils.AUTO_IMPORTED_PACKAGE)) {
+        if (fullName.startsWith(ImportFinder.AUTO_IMPORTED_PACKAGE)) {
             formattedType = simpleName;
         } else {
             formattedType = fullName;
@@ -90,7 +94,7 @@ public final class MethodDiscoveryUtils {
     /**
      * For generic types, returns short class name for java.* classes, otherwise fully qualified class name.
      */
-    private static String getSimplestClassNameForGeneric(String genericClassName) {
+    private String getSimplestClassNameForGeneric(String genericClassName) {
         String formattedType;
         int indexOfLastDot = genericClassName.lastIndexOf('.');
         int indexOfGt = genericClassName.lastIndexOf('>');

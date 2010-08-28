@@ -8,25 +8,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class ImportUtils {
+public class ImportFinder {
     public static final String AUTO_IMPORTED_PACKAGE = "java.lang";
 
-    private ImportUtils() {}
-
-    public static List<String> getRequiredImports(List<Method> writeMethods) {
+    public List<String> findRequiredImports(List<Method> writeMethods) {
         List<String> imports = new ArrayList<String>();
         for (Method writeMethod : writeMethods) {
             for (Class<?> paramType : writeMethod.getParameterTypes()) {
                 if (!paramType.isPrimitive()) {
                     String packageName = ClassUtils.getPackageCanonicalName(paramType);
-                    if (!packageName.startsWith(ImportUtils.AUTO_IMPORTED_PACKAGE)) {
-                        String importString = ImportUtils.getImport(paramType);
+                    if (!packageName.startsWith(AUTO_IMPORTED_PACKAGE)) {
+                        String importString = getImport(paramType);
                         if (!imports.contains(importString)) {
                             imports.add(importString);
                         }
                     }
-                    String importGeneric = ImportUtils.getImportForGeneric(writeMethod);
-                    if (ImportUtils.isValidGenericImport(imports, importGeneric)) {
+                    String importGeneric = getImportForGeneric(writeMethod);
+                    if (isValidGenericImport(imports, importGeneric)) {
                         imports.add(importGeneric);
                     }
                 }
@@ -35,13 +33,13 @@ public final class ImportUtils {
         return Collections.unmodifiableList(imports);
     }
 
-    private static boolean isValidGenericImport(List<String> imports, String importGeneric) {
+    private boolean isValidGenericImport(List<String> imports, String importGeneric) {
         return importGeneric != null
                 && !importGeneric.startsWith(AUTO_IMPORTED_PACKAGE)
                 && !imports.contains(importGeneric);
     }
 
-    static String getImport(Class<?> paramType) {
+    private String getImport(Class<?> paramType) {
         if (paramType.isArray()) {
             String typeName = paramType.getCanonicalName();
             return typeName.substring(0, typeName.indexOf('['));
@@ -50,7 +48,7 @@ public final class ImportUtils {
         }
     }
 
-    private static String getImportForGeneric(Method method) {
+    private String getImportForGeneric(Method method) {
         Type[] types = method.getGenericParameterTypes();
         String type = types[0].toString();
         int ltIndex = type.indexOf('<');
