@@ -19,6 +19,11 @@ public class Address {
         this.zips = zips;
     }
 
+    public Address(String state, String city) {
+        this.state = state;
+        this.city = city;
+    }
+
     public String getStreet1() {
         return street1;
     }

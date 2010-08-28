@@ -49,6 +49,7 @@ public class OMGen {
         String result = null;
         try {
             result = generator.generate(classToProcess, invocationContext);
+            System.out.print("\n");
         } catch (NoSetterMethodsException e) {
             System.out.println("no setter methods found, skipped.");
         }
