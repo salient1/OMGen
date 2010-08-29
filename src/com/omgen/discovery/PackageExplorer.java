@@ -12,30 +12,34 @@ import java.util.List;
 /**
  *
  */
-public final class ClassFinderUtils {
+public class PackageExplorer {
     public static final char SLASH_CHAR = System.getProperty("file.separator").charAt(0);
 
-    private ClassFinderUtils() {}
+    private String packageName;
 
-    public static List<String> getClasses(String packageName, InvocationContext invocationContext) throws ClassNotFoundException {
+    public PackageExplorer(String packageName) {
+        this.packageName = packageName;
+    }
+
+    public List<String> getClasses(InvocationContext invocationContext) throws ClassNotFoundException {
         ArrayList<String> classes;
 
         // Get a File object for the package
         File directory = null;
         String path = packageName.replace('.', '/');
 
-        directory = convertPackageToDir(packageName, directory, path);
+        directory = convertPackageToDir(directory, path);
 
         if (!directory.exists()) {
             throw new ClassNotFoundException(packageName + " does not appear to be a valid package");
         }
 
-        classes = buildClassList(packageName, invocationContext.isScanSubPackages(), directory);
+        classes = buildClassList(invocationContext.isScanSubPackages(), directory);
 
         return Collections.unmodifiableList(classes);
     }
 
-    private static ArrayList<String> buildClassList(String rootPackage, boolean scanSubPackages, File directory) throws ClassNotFoundException {
+    private ArrayList<String> buildClassList(boolean scanSubPackages, File directory) throws ClassNotFoundException {
         ArrayList<String> classes = new ArrayList<String>();
 
         File[] files = directory.listFiles();
@@ -43,46 +47,46 @@ public final class ClassFinderUtils {
             // we are only interested in .class files that are non-inner classes
             String filename = file.getName();
             if (isClassFile(filename) && !isInnerClass(filename)) {
-                String fullyQualifiedClassName = getFullyQualifiedClassName(rootPackage, file);
+                String fullyQualifiedClassName = getFullyQualifiedClassName(file);
                 classes.add(fullyQualifiedClassName);
             } else if (scanSubPackages && file.isDirectory()) {
-                classes.addAll(buildClassList(rootPackage, scanSubPackages, file));
+                classes.addAll(buildClassList(scanSubPackages, file));
             }
         }
         return classes;
     }
 
-    private static String getFullyQualifiedClassName(String rootPackage, File file) {
+    private String getFullyQualifiedClassName(File file) {
         String slashyClassName = null;
         try {
-            slashyClassName = slashesToDots(getFullyQualifiedClassName(file));
+            slashyClassName = slashesToDots(getCanonicalPath(file));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return stripRootPath(rootPackage, slashyClassName); // leaves you with just package and classname
+        return stripRootPath(slashyClassName); // leaves you with just package and classname
     }
 
-    private static String stripRootPath(String rootPackage, String slashyClassName) {
-        return slashyClassName.substring(slashyClassName.lastIndexOf(rootPackage), slashyClassName.length());
+    private String stripRootPath(String slashyClassName) {
+        return slashyClassName.substring(slashyClassName.lastIndexOf(packageName), slashyClassName.length());
     }
 
-    private static String getFullyQualifiedClassName(File file) throws IOException {
+    private String getCanonicalPath(File file) throws IOException {
         return file.getCanonicalPath().substring(0, file.getCanonicalPath().length() - 6);
     }
 
-    private static boolean isInnerClass(String filename) {
+    private boolean isInnerClass(String filename) {
         return filename.contains("$");
     }
 
-    private static boolean isClassFile(String filename) {
+    private boolean isClassFile(String filename) {
         return filename.endsWith(".class");
     }
 
-    private static String slashesToDots(String slashyString) {
+    private String slashesToDots(String slashyString) {
         return slashyString.replace(SLASH_CHAR, '.');
     }
 
-    private static File convertPackageToDir(String packageName, File directory, String path) throws ClassNotFoundException {
+    private File convertPackageToDir(File directory, String path) throws ClassNotFoundException {
         try {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             URL resource = classLoader.getResource(path);

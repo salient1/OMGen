@@ -12,8 +12,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -31,10 +32,11 @@ public class ClassUtilsTest {
     @Test
     public void testGetClasses() throws Exception {
         when(commandLine.getOptions()).thenReturn(new Option[0]);
+        when(commandLine.getArgs()).thenReturn(new String[] {"com.omgen"});
         InvocationContext invocationContext = spy(new InvocationContext(commandLine));
 
         when(invocationContext.isScanSubPackages()).thenReturn(true);
-        List<String> classes = ClassFinderUtils.getClasses("com.omgen", invocationContext);
+        List<String> classes = new PackageExplorer("com.omgen").getClasses(invocationContext);
         assertNotNull(classes);
     }
 }

@@ -5,7 +5,7 @@ import org.junit.Test;
 /**
  *
  */
-public class ClassFinderUtilsTest {
+public class PackageExplorerTest {
     @Test
     public void testGetClasses() throws Exception {
     }

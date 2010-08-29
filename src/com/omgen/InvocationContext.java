@@ -1,6 +1,6 @@
 package com.omgen;
 
-import com.omgen.discovery.ClassFinderUtils;
+import com.omgen.discovery.PackageExplorer;
 import com.omgen.generator.GeneratorType;
 import com.omgen.generator.OptionSetting;
 import com.omgen.generator.dtype.DTypeVelocityGenerator;
@@ -59,7 +59,7 @@ public class InvocationContext {
         for (String arg : args) {
             if (isArgAPackage(arg)) {
                 try {
-                    classes.addAll(ClassFinderUtils.getClasses(arg, this));
+                    classes.addAll(new PackageExplorer(arg).getClasses(this));
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
